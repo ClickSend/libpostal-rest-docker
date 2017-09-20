@@ -20,8 +20,8 @@ COPY ./app .
 COPY ./health_check.sh .
 RUN ./health_check.sh
 
-COPY ./entrypoint.sh .
-
 EXPOSE 8080 8081
 
-ENTRYPOINT ./entrypoint.sh
+COPY ./entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+ENTRYPOINT entrypoint.sh
