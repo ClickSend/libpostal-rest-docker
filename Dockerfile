@@ -20,7 +20,8 @@ COPY ./app .
 COPY ./health_check.sh .
 RUN ./health_check.sh
 
+COPY ./entrypoint.sh .
+
 EXPOSE 8080 8081
 
-CMD /libpostal/workspace/bin/libpostal-rest
-CMD pm2 start /app/index.js
+ENTRYPOINT ./entrypoint.sh
