@@ -16,6 +16,11 @@ RUN ./libpostal.sh
 COPY ./libpostal_rest.sh .
 RUN ./libpostal_rest.sh
 
-EXPOSE 8080
+COPY ./app .
+COPY ./health_check.sh .
+RUN ./health_check.sh
+
+EXPOSE 8080 8081
 
 CMD /libpostal/workspace/bin/libpostal-rest
+CMD pm2 start /app/index.js
