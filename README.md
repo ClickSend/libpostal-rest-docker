@@ -50,6 +50,14 @@ Replace <host> with your host
 ]
 ```
 
+## Health Check
+`curl -X GET <host>:8080/health`
+
+**Response**
+```
+OK
+```
+
 # Credits
 - For more info on REST API: [See johnlonganecker/libpostal-rest](https://github.com/johnlonganecker/libpostal-rest)
 - For more info on libpostal: [See openvenues/libpostal](https://github.com/openvenues/libpostal)
