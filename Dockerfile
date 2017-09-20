@@ -7,21 +7,23 @@ RUN apt-get update && apt-get install -y \
     git
 
 WORKDIR /
-RUN git clone https://github.com/openvenues/libpostal
 
+COPY . .
+
+RUN git clone https://github.com/openvenues/libpostal
 WORKDIR /libpostal
 RUN git checkout $COMMIT
-COPY ./libpostal.sh .
+#COPY ./libpostal.sh .
 RUN ./libpostal.sh
-COPY ./libpostal_rest.sh .
+#COPY ./libpostal_rest.sh .
 RUN ./libpostal_rest.sh
 
 WORKDIR /
-COPY ./health_check.sh .
+#COPY ./health_check.sh .
 RUN ./health_check.sh
 
 
-COPY ./app .
+#COPY ./app .
 WORKDIR /app
 RUN npm install && nodejs -v && npm -v
 
