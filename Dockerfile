@@ -17,19 +17,7 @@ LABEL   Maintainer="support@clicksend.com" \
         org.label-schema.schema-version="1.0.0"
 
 RUN apk update && apk upgrade
-RUN apk --no-cache --update add --virtual .build-deps \
-        curl \
-        snappy-dev \
-        autoconf \
-        automake \
-        make \
-        gcc \
-        g++ \
-        libtool \
-        pkgconfig \
-        git \
-        sed \
-        parallel
+RUN apk --update --no-cache add --virtual .build-deps autoconf automake curl gcc g++ libtool make pkgconfig git sed
 
 WORKDIR /go/
 COPY . /go/
@@ -52,11 +40,11 @@ COPY . /go/
 # Fix Alpine issue
 RUN ./build_libpostal.sh
 #RUN ./build_libpostal_rest.sh
-RUN go install libpostal-rest
+#RUN go install libpostal-rest
 
 EXPOSE 8080
 
 #CMD /go/src/app/workspace/bin/libpostal-rest
 
-CMD ["libpostal-rest"]
+CMD ["go", "install", "libpostal-rest"]
 
