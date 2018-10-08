@@ -6,23 +6,26 @@ FROM ubuntu:18.04
 #ENV DEBIAN_FRONTEND noninteractive
 
 RUN apt-get update && apt-get install -y \
-    curl libsnappy-dev autoconf automake libtool pkg-config \
+    curl libsnappy-dev autoconf automake libtool pkg-config libtool-bin \
     git \
     golang \
     sed \
     bash
 
 COPY . .
+
 WORKDIR /
 
 COPY ./libpostal.sh .
 RUN chmod +x ./libpostal.sh
 RUN ./libpostal.sh
 
-COPY ./libpostal_rest.sh .
-RUN chmod +x ./libpostal_rest.sh
-RUN ./libpostal_rest.sh
+#COPY ./libpostal_rest.sh .
+#RUN chmod +x ./libpostal_rest.sh
+#RUN ./libpostal_rest.sh
 
 EXPOSE 8080
 
-CMD /libpostal/workspace/bin/libpostal-rest
+#CMD /libpostal/workspace/bin/libpostal-rest
+CMD ["./libpostal_rest.sh"]
+
