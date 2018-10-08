@@ -17,20 +17,22 @@ LABEL   Maintainer="support@clicksend.com" \
         org.label-schema.schema-version="1.0.0"
 
 RUN apk update && apk upgrade
-RUN apk add --no-cache --virtual .build-deps \
+RUN apk --no-cache --update add --virtual .build-deps \
         curl \
         snappy-dev \
         autoconf \
         automake \
         make \
+        gcc \
         g++ \
         libtool \
+        pkgconfig \
         git \
-        sed
+        sed \
+        parallel
 
-
-WORKDIR /go/src/app
-COPY . /go/src/app
+WORKDIR /go/
+COPY . /go/
 
 #COPY ./libpostal.sh .
 #RUN chmod +x ./libpostal.sh
@@ -45,15 +47,16 @@ COPY . /go/src/app
 
 #RUN go install -v /go/src/app/libpostal-rest
 
-COPY libpostal /go/src/app/libpostal
+#COPY libpostal /go/src/app/libpostal
 
-WORKDIR /go/src/app/
+# Fix Alpine issue
 RUN ./build_libpostal.sh
-RUN ./build_libpostal_rest.sh
+#RUN ./build_libpostal_rest.sh
+RUN go install libpostal-rest
 
 EXPOSE 8080
 
-CMD /go/src/app/workspace/bin/libpostal-rest
+#CMD /go/src/app/workspace/bin/libpostal-rest
 
-#CMD ["app"]
+CMD ["libpostal-rest"]
 

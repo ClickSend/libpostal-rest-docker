@@ -6,13 +6,13 @@ cd ./libpostal
 ./bootstrap.sh
 
 # Make compile path.
-mkdir -p "/tmp/libpostal_compiled"
+mkdir -p "/tmp"
 
 # Configure.
-./configure --datadir="/tmp/libpostal_compiled"
+./configure --datadir="/tmp"
 
 # Make and install.
-make
+make -j2
 make install
 
 if [ "$(uname)" == "Darwin" ]; then
