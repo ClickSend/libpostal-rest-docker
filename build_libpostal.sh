@@ -1,16 +1,18 @@
 #!/usr/bin/env bash
 
+cd ./libpostal
+
 # Bootstrap.
 ./bootstrap.sh
 
 # Make compile path.
-mkdir -p /tmp/libpostal_compiled
+mkdir -p "/tmp/libpostal_compiled"
 
 # Configure.
-./configure --datadir=/tmp/libpostal_compiled
+./configure --datadir="/tmp/libpostal_compiled"
 
 # Make and install.
-make -j4 distclen
+make
 make install
 
 if [ "$(uname)" == "Darwin" ]; then

@@ -30,22 +30,30 @@ RUN apk add --no-cache --virtual .build-deps \
 
 
 WORKDIR /go/src/app
-COPY . .
+COPY . /go/src/app
 
-COPY ./libpostal.sh .
-RUN chmod +x ./libpostal.sh
-RUN ./libpostal.sh
+#COPY ./libpostal.sh .
+#RUN chmod +x ./libpostal.sh
+#RUN ./libpostal.sh
 
-COPY ./libpostal_rest.sh .
-RUN chmod +x ./libpostal_rest.sh
-#RUN ./libpostal_rest.sh
-
-EXPOSE 8080
+#COPY libpostal_rest.sh /go/src/app
+#RUN chmod +x /go/src/app/libpostal/compile_libpostal.sh
+#RUN /go/src/app/libpostal/compile_libpostal.sh
 
 #CMD /libpostal/workspace/bin/libpostal-rest
 #CMD ["./libpostal_rest.sh"]
 
-RUN go install -v ./libpostal-rest
+#RUN go install -v /go/src/app/libpostal-rest
 
-CMD ["app"]
+COPY libpostal /go/src/app/libpostal
+
+WORKDIR /go/src/app/
+RUN ./build_libpostal.sh
+RUN ./build_libpostal_rest.sh
+
+EXPOSE 8080
+
+CMD /go/src/app/workspace/bin/libpostal-rest
+
+#CMD ["app"]
 
