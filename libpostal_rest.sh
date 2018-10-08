@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-# Download Go.
-curl https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz > go1.8.linux-amd64.tar.gz
-tar xzf go1.8.linux-amd64.tar.gz
-
 # Set Paths.
-export GOROOT=/libpostal/go
-export GOPATH=/libpostal/workspace
-export PATH=$PATH:/libpostal/go/bin
+export GOPATH=~/./go
+export GOROOT=/usr/local/opt/go/libexec
+export PATH=$PATH:$GOPATH/bin
+export PATH=$PATH:$GOROOT/bin
+
+echo $GOPATH
+echo $GOROOT
 
 # Get go script.
 go get github.com/johnlonganecker/libpostal-rest
