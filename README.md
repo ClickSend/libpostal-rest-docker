@@ -2,11 +2,11 @@
 
 ## Download Docker Image
 
-See Docker Hub: [clicksend/libpostal-rest](https://hub.docker.com/r/clicksend/libpostal-rest)
+See Docker Hub: [service-libpostal](https://github.com/ClickSend/service-libpostal)
 
 ## Running image
 
-Run this command: `docker run -d -p 8080:8080 clicksend/libpostal-rest` 
+Run this command: `docker run -d -p 8080:8080 service-libpostal` 
 
 ## API Example
 
