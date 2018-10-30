@@ -1,40 +1,25 @@
-version: '3'
+version: "3.3"
+
 services:
   web:
-    image: 434615214996.dkr.ecr.ap-southeast-2.amazonaws.com/docker-nginx-lumen-local:latest
-    restart: always
-    tty: true
-    volumes:
-      - ./:/var/www/html
+    image: 434615214996.dkr.ecr.ap-southeast-2.amazonaws.com/docker-nginx-go-local:latest
     ports:
-      - "8087:80"
+    - "8087:80"
     links:
-      - golang
-    depends_on:
-      - golang
-    environment:
-      - GO_VERSION=1.11.1
-      - ARG ALPINE_VERSION=3.8
-      - LIBPOSTAL_DATADIR=/tmp
-      - LIBPOSTAL_VERSION=v1.0.0
-      - LIBPOSTAL_DATA_FILE="libpostal_data.tar.gz"
-      - LIBPOSTAL_PARSER_FILE="parser.tar.gz"
-      - LIBPOSTAL_LANG_CLASS_FILE="language_classifier.tar.gz"
-      - PARALLEL_WORKERS=12
-
-  golang:
-    #image: 434615214996.dkr.ecr.ap-southeast-2.amazonaws.com/service-locale-local:latest
+    - service-libpostal
+  service-libpostal:
     build: .
     environment:
-      - GO_VERSION=1.11.1
-      - ARG ALPINE_VERSION=3.8
-      - LIBPOSTAL_DATADIR=/tmp
-      - LIBPOSTAL_VERSION=v1.0.0
-      - LIBPOSTAL_DATA_FILE="libpostal_data.tar.gz"
-      - LIBPOSTAL_PARSER_FILE="parser.tar.gz"
-      - LIBPOSTAL_LANG_CLASS_FILE="language_classifier.tar.gz"
-      - PARALLEL_WORKERS=12
+      GOLANG_VERSION: 1.11.1
+      LIBPOSTAL_VERSION: "v1.0.0"
+      LIBPOSTAL_DATADIR: "${LIBPOSTAL_DATADIR:-'/opt/libpostal_data'}"
+      LIBPOSTAL_DATA_FILE: "${LIBPOSTAL_DATA_FILE:-'libpostal_data.tar.gz'}"
+      LIBPOSTAL_PARSER_FILE: "${LIBPOSTAL_PARSER_FILE:-'parser.tar.gz'}"
+      LIBPOSTAL_LANG_CLASS_FILE: "${LIBPOSTAL_LANG_CLASS_FILE:-'language_classifier.tar.gz'}"
+      PARALLEL_WORKERS: "${PARALLEL_WORKERS:-20}"
+      DOWNLOAD_LIBPOSTAL_DATA: "${DOWNLOAD_LIBPOSTAL_DATA:-false}"
+      PKG_CONFIG_PATH: "${PKG_CONFIG_PATH:-'/usr/local/lib/pkgconfig'}"
     ports:
-      - "8080:8080"
+    - "8080:8080"
     volumes:
-      - ./:/.
+    - ./:/libpostal/

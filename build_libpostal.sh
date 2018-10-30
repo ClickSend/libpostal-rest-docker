@@ -1,19 +1,20 @@
 #!/usr/bin/env bash
 
-cd ./libpostal
+cd libpostal
 
 # Bootstrap.
 ./bootstrap.sh
 
 # Make compile path.
-mkdir -p "/tmp"
+mkdir -p "/opt/libpostal_data"
 
 # Configure.
-./configure --datadir="/tmp"
+./configure --datadir="/opt/libpostal_data"
 
 # Make and install.
-make -j2
+make
 make install
+make test
 
 if [ "$(uname)" == "Darwin" ]; then
     # Update C ldconfig for OS X platform
