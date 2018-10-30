@@ -1,4 +1,6 @@
 #!/usr/bin/env sh
+set -e
+
 export GO_VERSION=${GO_VERSION:-"1.11.1"}
 export GOROOT=/libpostal/go
 export GOARCH=amd64

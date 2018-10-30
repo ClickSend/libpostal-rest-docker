@@ -19,7 +19,7 @@ ENV DEBIAN_FRONTEND=interactive \
     GOROOT=/libpostal/go \
     GOARCH=amd64 \
     GOOS=linux \
-    GOPATH=/libpostal \
+    GOPATH=/libpostal/workspace \
     LIBPOSTAL_DATA_DIR="/opt/libpostal_data" \
     PATH=$PATH:/libpostal/go/bin \
     PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
@@ -42,8 +42,8 @@ RUN chmod +x /libpostal/*.sh && \
     /libpostal/build_libpostal.sh && \
     pkg-config --libs --cflags libpostal
 
-RUN go install libpostal-rest
+RUN /libpostal/build_libpostal_rest.sh
 
 EXPOSE 8087
 
-CMD ["/libpostal/bin/libpostal-rest"]
+CMD ["/libpostal/workspace/libpostal-rest"]
