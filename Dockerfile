@@ -1,5 +1,5 @@
 ARG CIRCLE_PROJECT_REPONAME=libpostal
-ARG DOCKER_IMAGE=golang
+ARG DOCKER_IMAGE=centos
 ARG DOCKER_VERSION=latest
 ARG VCS_REF
 ARG BUILD_DATE=$("date -u")
@@ -24,14 +24,24 @@ ENV DEBIAN_FRONTEND=interactive \
     PATH=$PATH:/libpostal/go/bin \
     PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
 
-RUN apt-get update && apt-get install -y autoconf \
+# insgtall docker for Centos7
+#RUN yum check-update && \
+#    yum remove -y docker docker-common docker-selinux docker-engine \
+#    yum install -y yum-utils device-mapper-persistent-data lvm2 docker \
+#    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo \
+#    yum install -y docker-ce && \
+#    systemctl status docker
+
+RUN yum install -y autoconf \
     curl libsnappy-dev \
     automake \
     libtool \
     git \
     build-essential \
     checkinstall \
-    pkg-config
+    pkg-config \
+    make && \
+    yum groupinstall -y "Development Tools"
 
 COPY . /libpostal/
 
