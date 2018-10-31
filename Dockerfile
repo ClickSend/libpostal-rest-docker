@@ -52,7 +52,9 @@ RUN chmod +x /libpostal/*.sh && \
     /libpostal/build_libpostal.sh && \
     pkg-config --libs --cflags libpostal
 
-RUN /libpostal/build_libpostal_rest.sh
+#RUN /libpostal/build_libpostal_rest.sh
+RUN cd /libpostal/go/src/libpostal_rest && \
+    go build
 
 EXPOSE 8087
 

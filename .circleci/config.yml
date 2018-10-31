@@ -1,0 +1,252 @@
+# CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-php/ for more details
+#
+version: 2
+jobs:
+  build:
+    docker:
+      - image: mesosphere/aws-cli
+        environment:
+          DOCKERIZE_VERSION: v0.6.1
+    steps:
+      - checkout
+
+      # Updates and installs
+      - run:
+          name: "Package update and add docker, curl jq and bash"
+          command: |
+            apk update && apk upgrade
+            apk add docker curl jq
+            apk add --no-cache bash \
+                  autoconf \
+                  automake \
+                  gcc \
+                  g++ \
+                  libtool \
+                  make \
+                  pkgconfig \
+                  git \
+                  sed \
+                  parallel \
+                  wget
+
+      - run:
+          name: "Install dockerize"
+          command: |
+            wget "https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz" \
+                && tar -C /usr/local/bin -xzvf "dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz" \
+                && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+      - run:
+          name: "Add AWS CLI"
+          command: |
+            apk add python py-pip groff less mailcap
+            pip install --upgrade awscli==1.14.5 s3cmd==2.0.1 python-magic
+            apk -v --purge del py-pip
+            rm /var/cache/apk/*
+            
+      - setup_remote_docker:
+          docker_layer_caching: false
+ 
+       # .env file settings
+      - run:
+          name: "Populate .env file"
+          command: |
+            echo APP_ENV=${ENV_NAME} >> .env
+            echo APP_KEY=service-libpostal >> .env
+            echo APP_DEBUG=false >> .env
+            echo "" >> .env
+            echo LOG_CHANNEL=stack >> .env
+            echo LOG_SLACK_WEBHOOK_URL= >> .env
+            echo "" >> .env
+            echo CACHE_DRIVER=file >> .env
+            echo SESSION_DRIVER=file >> .env
+            echo QUEUE_DRIVER=file >> .env
+            echo "" >> .env
+            echo DOWNLOAD_LIBPOSTAL_DATA=false >> .env
+            echo "" >> .env
+            echo LIBPOSTAL_DATADIR=/opt/libpostal_data >> .env
+            echo LIBPOSTAL_VERSION=v1.0.0 >> .env
+            echo LIBPOSTAL_DATA_FILE=libpostal_data.tar.gz >> .env
+            echo LIBPOSTAL_PARSER_FILE=parser.tar.gz >> .env
+            echo LIBPOSTAL_LANG_CLASS_FILE=language_classifier.tar.gz >> .env
+            echo "" >> .env
+            echo PKG_CONFIG_PATH=/usr/local/lib/pkgconfig >> .env
+            echo PARALLEL_WORKERS=null >> .env
+            echo "" >> .env
+            echo "# Service details" >> .env
+            echo SERVICE_NAME=libpostal >> .env
+            echo SERVICE_LIBPOSTAL_URL=http://service-libpostal >> .env
+            echo SERVICE_LIBPOSTAL_PORT=8087 >> .env
+
+#      - run:
+#          name: "Add new relic ini"
+#          command: |
+#            echo "" >> .circleci/php-override.ini
+#            echo newrelic.license=$NEWRELIC_LICENSE >> .circleci/php-override.ini
+#            echo newrelic.appname=$CIRCLE_PROJECT_REPONAME >> .circleci/php-override.ini
+#
+#      - run:
+#          name: "Add Sqreen"
+#          command: |
+#            echo "" >> .circleci/php-override.ini
+#            echo sqreen.token=$SQREEN_TOKEN_PHP >> .circleci/php-override.ini
+            
+      - run:
+          name: "Login to AWS CLI"
+          command: |
+            eval $(aws ecr get-login --no-include-email --region $AWS_REGION | sed 's|https://||')
+
+      - run:
+          name: "Build Docker Image"
+          command: |
+            docker build -t $CIRCLE_PROJECT_REPONAME-$ENV_NAME --build-arg ENV_NAME=${ENV_NAME} --build-arg NEWRELIC_VERSION=${NEWRELIC_VERSION} --build-arg CIRCLE_PROJECT_REPONAME=${CIRCLE_PROJECT_REPONAME} .
+
+      - run:
+          name: "Tag Docker Image 1"
+          command: |
+            docker tag $CIRCLE_PROJECT_REPONAME-$ENV_NAME:latest $AWS_ACCOUNT_NUMBER.dkr.ecr.$AWS_REGION.amazonaws.com/$CIRCLE_PROJECT_REPONAME-$ENV_NAME:latest
+            docker push $AWS_ACCOUNT_NUMBER.dkr.ecr.$AWS_REGION.amazonaws.com/$CIRCLE_PROJECT_REPONAME-$ENV_NAME:latest
+
+      - run:
+          name: "Tag Docker Image 2"
+          command: |
+            docker tag $CIRCLE_PROJECT_REPONAME-$ENV_NAME:latest $AWS_ACCOUNT_NUMBER.dkr.ecr.$AWS_REGION.amazonaws.com/$CIRCLE_PROJECT_REPONAME-$ENV_NAME:$CIRCLE_SHA1
+            docker push $AWS_ACCOUNT_NUMBER.dkr.ecr.$AWS_REGION.amazonaws.com/$CIRCLE_PROJECT_REPONAME-$ENV_NAME:$CIRCLE_SHA1
+
+  test:
+    docker:
+    - image: $AWS_ACCOUNT_NUMBER.dkr.ecr.$AWS_REGION.amazonaws.com/$CIRCLE_PROJECT_REPONAME-$ENV_NAME:$CIRCLE_SHA1
+      environment:
+        DOCKERIZE_VERSION: v0.6.1
+      aws_auth:
+        aws_access_key_id: $AWS_ECR_ACCESS_KEY_ID
+        aws_secret_access_key: $AWS_ECR_SECRET_ACCESS_KEY
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: false
+
+      - run:
+          name: "Install dockerize"
+          command: |
+            wget "https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz" \
+                && tar -C /usr/local/bin -xzvf "dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz" \
+                && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+      - run:
+          name: "Run server"
+          command: /root/go/bin/libpostal-rest
+          background: true
+
+      - run:
+          name: "Waiting for libpostal to be ready"
+          command: dockerize -wait http://localhost:8080/health -timeout 1m
+
+      - run:
+          name: "Run Go unit tests"
+          command: |
+            cd tests
+            go test -v
+
+  deploy:
+    docker:
+    - image: $AWS_ACCOUNT_NUMBER.dkr.ecr.$AWS_REGION.amazonaws.com/$CIRCLE_PROJECT_REPONAME-$ENV_NAME:$CIRCLE_SHA1
+      environment:
+        DOCKERIZE_VERSION: v0.6.1
+      aws_auth:
+        aws_access_key_id: $AWS_ECR_ACCESS_KEY_ID
+        aws_secret_access_key: $AWS_ECR_SECRET_ACCESS_KEY
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          docker_layer_caching: false
+
+      - run:
+          name: "Install dockerize"
+          command: |
+            wget "https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz" \
+                && tar -C /usr/local/bin -xzvf "dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz" \
+                && rm dockerize-alpine-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+      - run:
+          name: "Run server"
+          command: /root/go/bin/libpostal-rest
+          background: true
+
+      - run:
+          name: "Waiting for libpostal to be ready"
+          command: dockerize -wait http://localhost:8080/health -timeout 1m
+
+      # Updates and installs
+      - run:
+          name: "AWS CLI login"
+          command: |
+            eval $(aws ecr get-login --no-include-email --region $AWS_REGION | sed 's|https://||')
+
+      - run:
+          name: "Make deploy script executable"
+          command: |
+            chmod +x ./.circleci/deploy.sh
+
+      - run:
+          name: "Execute deploy script"
+          command: |
+            ./.circleci/deploy.sh
+workflows:
+  version: 2
+  deploy-local:
+    jobs:
+    - build:
+        filters:
+          branches:
+            only:
+            - deploy-local
+        context: local
+    - test:
+        requires:
+        - build
+        context: local
+  deploy-development:
+    jobs:
+    - build:
+        filters:
+          branches:
+            only:
+            - deploy-development
+        context: development
+    - test:
+        requires:
+        - build
+        context: development
+    - deploy:
+        requires:
+        - test
+        context: development
+  deploy-staging:
+    jobs:
+    - build:
+        filters:
+          branches:
+            only:
+            - deploy-staging
+        context: staging
+    - deploy:
+        requires:
+        - build
+        context: staging
+  deploy-production:
+    jobs:
+    - build:
+        filters:
+          branches:
+            only:
+            - deploy-production
+        context: production
+    - deploy:
+        requires:
+        - build
+        context: production
