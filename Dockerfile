@@ -24,15 +24,9 @@ ENV DEBIAN_FRONTEND=interactive \
     PATH=$PATH:/libpostal/go/bin \
     PKG_CONFIG_PATH="/usr/local/lib/pkgconfig"
 
-# insgtall docker for Centos7
-#RUN yum check-update && \
-#    yum remove -y docker docker-common docker-selinux docker-engine \
-#    yum install -y yum-utils device-mapper-persistent-data lvm2 docker \
-#    yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo \
-#    yum install -y docker-ce && \
-#    systemctl status docker
-
-RUN yum install -y autoconf \
+# Update and install packages
+RUN yum update -y && \
+    yum install -y autoconf \
     curl libsnappy-dev \
     automake \
     libtool \
@@ -47,15 +41,18 @@ COPY . /libpostal/
 
 WORKDIR /libpostal
 
+# Install go
+RUN /libpostal/install_go.sh
+
+# Build and install libpostal
 RUN chmod +x /libpostal/*.sh && \
     chmod +x /libpostal/bin/*  && \
     /libpostal/build_libpostal.sh && \
     pkg-config --libs --cflags libpostal
 
-#RUN /libpostal/build_libpostal_rest.sh
-RUN cd /libpostal/go/src/libpostal_rest && \
-    go build
+# Build and install libpostal
+RUN /libpostal/build_libpostal_rest.sh
 
-EXPOSE 8087
+EXPOSE 8080
 
 CMD ["/libpostal/workspace/libpostal-rest"]

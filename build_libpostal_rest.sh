@@ -11,7 +11,7 @@ export PATH=$PATH:/usr/local/go/bin
 echo "Installing go"
 curl "https://storage.googleapis.com/golang/go$GO_VERSION.linux-amd64.tar.gz" > "go$GO_VERSION.linux-amd64.tar.gz"
 echo "2871270d8ff0c8c69f161aaae42f9f28739855ff5c5204752a8d92a1c9f63993  go$GO_VERSION.linux-amd64.tar.gz" | sha256sum -c
-sudo tar -C /usr/local -xzf "go$GO_VERSION.linux-amd64.tar.gz"
+tar -C /usr/local -xzf "go$GO_VERSION.linux-amd64.tar.gz"
 rm "go$GO_VERSION.linux-amd64.tar.gz"
 
 # Test go installed
