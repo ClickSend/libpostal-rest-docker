@@ -10,7 +10,6 @@ services:
   service-libpostal:
     build: .
     environment:
-      GOLANG_VERSION: 1.11.1
       LIBPOSTAL_VERSION: "v1.0.0"
       LIBPOSTAL_DATADIR: "${LIBPOSTAL_DATADIR:-'/opt/libpostal_data'}"
       LIBPOSTAL_DATA_FILE: "${LIBPOSTAL_DATA_FILE:-'libpostal_data.tar.gz'}"
@@ -20,6 +19,6 @@ services:
       DOWNLOAD_LIBPOSTAL_DATA: "${DOWNLOAD_LIBPOSTAL_DATA:-false}"
       PKG_CONFIG_PATH: "${PKG_CONFIG_PATH:-'/usr/local/lib/pkgconfig'}"
     ports:
-    - "8080:8080"
+    - "8087:8087"
     volumes:
-    - ./:/libpostal/
+    - ./:/var/www/htm/

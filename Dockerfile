@@ -49,7 +49,9 @@ RUN yum -y install \
     python36u-devel \
     python36u-pip \
     postgresql \
-    python-pip
+    python-pip \
+    python-devel \
+    pkgconfig
 
 # Install libpostal
 WORKDIR /etc
@@ -65,7 +67,6 @@ RUN /etc/build_libpostal.sh
 #    ldconfig
 
 COPY var /
-WORKDIR /var/www/html
 
 # Install pypostal (using python3)
 RUN pip install --upgrade pip && \
@@ -97,5 +98,7 @@ RUN ln -s /usr/lib/libpostal.a /usr/lib64/libpostal.a && \
 # Create a 'source' volume for mounting external python source files.
 VOLUME /src
 
+EXPOSE 8087
+
 # Start server
-CMD ["python", "server.py"]
+CMD ["python", "/var/www/html/server.py"]
