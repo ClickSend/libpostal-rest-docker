@@ -1,24 +1,28 @@
 #!/usr/bin/env bash
 
-cd libpostal
+export LIBPOSTAL_DATADIR=${LIBPOSTAL_DATADIR:='/opt/libpostal_data'}
+
+cd /libpostal/src/libpostal
 
 # Bootstrap.
 ./bootstrap.sh
 
-# Make compile path.
-mkdir -p "/opt/libpostal_data"
+if [ ! -d "$LIBPOSTAL_DATADIR" ]; then
+    # Set up data dir
+    mkdir -p "$LIBPOSTAL_DATADIR"
+fi
 
 # Configure.
-./configure --datadir="/opt/libpostal_data"
+./configure --datadir="$LIBPOSTAL_DATADIR"
 
 # Make and install.
-make -j4
-sudo make install
+make -j2
+make install
 
 if [ "$(uname)" == "Darwin" ]; then
     # Update C ldconfig for OS X platform
-    sudo update_dyld_shared_cache
+    update_dyld_shared_cache
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # Update C ldconfig for GNU/Linux platform
-    sudo ldconfig
+    ldconfig
 fi

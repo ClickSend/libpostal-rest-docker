@@ -4,9 +4,9 @@ services:
   web:
     image: 434615214996.dkr.ecr.ap-southeast-2.amazonaws.com/docker-nginx-go-local:latest
     ports:
-    - "8087:80"
+      - "8087:80"
     links:
-    - service-libpostal
+      - service-libpostal
   service-libpostal:
     build: .
     environment:
@@ -19,6 +19,7 @@ services:
       DOWNLOAD_LIBPOSTAL_DATA: "${DOWNLOAD_LIBPOSTAL_DATA:-false}"
       PKG_CONFIG_PATH: "${PKG_CONFIG_PATH:-'/usr/local/lib/pkgconfig'}"
     ports:
-    - "8087:8087"
+      - "8087:8087"
     volumes:
-    - ./:/var/www/htm/
+      - ./:/var/www/html/
+

@@ -4,7 +4,6 @@ from flask_restful import Resource, Api
 from json import dumps
 from postal.expand import expand_address
 from postal.parser import parse_address
-import connexion
 import os
 
 # Create the application instance
@@ -82,6 +81,6 @@ if __name__ == '__main__':
     service_port = os.environ.get('SERVICE_LIBPOSTAL_PORT', 8087)
     service_debug = os.environ.get('APP_DEBUG', False)
     if(service_debug.lower() == "false"):
-	service_debug = False
+	    ervice_debug = False
 
     app.run(host=service_host, port=service_port, debug=service_debug)
