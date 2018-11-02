@@ -17,7 +17,7 @@ sudo make install
 
 if [ "$(uname)" == "Darwin" ]; then
     # Update C ldconfig for OS X platform
-    update_dyld_shared_cache
+    sudo update_dyld_shared_cache
 elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
     # Update C ldconfig for GNU/Linux platform
     sudo ldconfig
