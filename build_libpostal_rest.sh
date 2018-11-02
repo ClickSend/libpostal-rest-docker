@@ -14,9 +14,6 @@ echo "2871270d8ff0c8c69f161aaae42f9f28739855ff5c5204752a8d92a1c9f63993  go$GO_VE
 tar -C /usr/local -xzf "go$GO_VERSION.linux-amd64.tar.gz"
 rm "go$GO_VERSION.linux-amd64.tar.gz"
 
-# Test go installed
-go -v
-
 # Get script.
 go get github.com/johnlonganecker/libpostal-rest
 

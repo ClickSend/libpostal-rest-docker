@@ -12,6 +12,10 @@ export LIBPOSTAL_LANG_CLASS_FILE="language_classifier.tar.gz"
 export PARALLEL_WORKERS=20
 export LIBPOSTAL_DOWNLOAD_URL="https://github.com/openvenues/libpostal/releases/download"
 
+if [ ! -d "$LIBPOSTAL_DATADIR" ]; then
+    mkdir -p $LIBPOSTAL_DATADIR
+fi
+
 echo "Downloading latest libpostal data files: - $DOWNLOAD_LIBPOSTAL_DATA, to dir: $LIBPOSTAL_DATADIR"
 if [ "$DOWNLOAD_LIBPOSTAL_DATA" = "true" ] ; then
     cd "${LIBPOSTAL_DATADIR}"
